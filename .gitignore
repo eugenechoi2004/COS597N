@@ -1,2 +1,4 @@
 pytorch_env/
 data/raw_data
+dr-bert-folder/checkpoint-final
+dr-bert-folder/Datasets
