@@ -2,3 +2,7 @@ pytorch_env/
 data/raw_data
 dr-bert-folder/checkpoint-final
 dr-bert-folder/Datasets
+*-checkpoint.ipynb
+*slurm-*.out
+dr-bert-folder/baseline_outputs/
+dr-bert-folder/subset_outputs/
