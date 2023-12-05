@@ -6,3 +6,4 @@ dr-bert-folder/Datasets
 *slurm-*.out
 dr-bert-folder/baseline_outputs/
 dr-bert-folder/subset_outputs/
+.DS_Store
