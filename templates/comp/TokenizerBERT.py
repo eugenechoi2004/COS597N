@@ -3,11 +3,13 @@ from torch import nn
 import torch.nn.functional as F
 import math
 import numpy as np
-from transformers import BertTokenizer
+from tokenizers.trainers import BpeTrainer
 
 
 
-class Tokenizer(nn.Module):
+
+
+class TokenizerBERT(nn.Module):
     def __init__(self, max_sequence_length):
         super(Tokenizer, self).__init__()
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
