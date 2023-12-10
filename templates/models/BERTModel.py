@@ -6,13 +6,14 @@ sys.path.append('../comp')
 from Encoder import Encoder
 
 class BERTModel(nn.Module):
-    def __init__(self, max_sequence_length, embedding_dim, hidden_dim, dropout_prob, num_heads):
+    def __init__(self, max_sequence_length, embedding_dim, hidden_dim, dropout_prob, num_heads, num_layers):
         super(BERTModel, self).__init__()
-        self.encoder_layer = Encoder(max_sequence_length, embedding_dim, hidden_dim, dropout_prob, num_heads)
+        self.layers = nn.ModuleList([nn.Encoder() for _ in range(num_layers)])
 
     def forward(self, x):
-        x = self.encoder_layer(x)
-        print(x.size())
+        for layer in self.layers:
+            x = layer(x)
+        return x
 
 
 # Hyperparams
@@ -22,6 +23,7 @@ max_sequence_length = 500
 hidden_dim = 3072 # from paper
 dropout_prob = 0.2
 num_heads = 12 # from paper
+mlm_prob = 0.15
 # 15% of rht mlm batch_size 10 ~ 11 epochs
 
 

@@ -1,23 +1,27 @@
 import torch
-from torch import nn
-import torch.nn.functional as F
-import math
-import numpy as np
-from tokenizers.trainers import BpeTrainer
+import json
 
+class TokenizerBERT:
+    def __init__(self, vocab_file, max_length):
+        with open(vocab_file, 'r') as f:
+            self.vocab = json.load(f)
+        self.max_length = max_length
+        self.pad_token_id = self.vocab['[PAD]']
+        self.id_to_token = {id_: token for token, id_ in self.vocab.items()}
 
+    def encode(self, text):
+        token_ids = self.tokenize_and_pad(text)
+        return torch.tensor(token_ids)
 
+    def tokenize_and_pad(self, text):
+        token_ids = [self.vocab.get(token, self.vocab['[UNK]']) for token in text]
+        return self.pad(token_ids)
 
+    def pad(self, token_ids):
+        padded = token_ids[:self.max_length]
+        padded += [self.pad_token_id] * (self.max_length - len(padded))
+        return padded
 
-class TokenizerBERT(nn.Module):
-    def __init__(self, max_sequence_length):
-        super(Tokenizer, self).__init__()
-        self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-        self.vocab_size = len(self.tokenizer.vocab)
-        self.max_length = max_sequence_length
+    def decode(self, token_ids):
+        return ''.join([self.id_to_token.get(id_, '[UNK]') for id_ in token_ids if id_ != self.pad_token_id])
 
-
-    def forward(self, x):
-        encoded_input = self.tokenizer(x, padding='max_length', max_length=self.max_length, truncation=True, return_tensors="pt")
-        input_ids = encoded_input['input_ids']
-        return input_ids

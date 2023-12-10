@@ -14,7 +14,6 @@ class Tokenizer(nn.Module):
         self.vocab_size = len(self.tokenizer.vocab)
         self.max_length = max_sequence_length
 
-
     def forward(self, x):
         encoded_input = self.tokenizer(x, padding='max_length', max_length=self.max_length, truncation=True, return_tensors="pt")
         input_ids = encoded_input['input_ids']

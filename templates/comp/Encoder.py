@@ -8,10 +8,8 @@ from SelfAttention import SelfAttention
 from PositionWiseFeedForward import PositionWiseFeedForward
 
 class Encoder(nn.Module):
-    def __init__(self, max_sequence_length, embedding_dim, hidden_dim, dropout_prob, num_heads):
+    def __init__(self, max_sequence_length, embedding_dim, hidden_dim, dropout_prob, num_heads, vocab_length):
         super(Encoder, self).__init__()
-        self.tokenizer = Tokenizer(max_sequence_length)
-        vocab_length = self.tokenizer.vocab_size
         self.embedding = Embedding(vocab_size=vocab_length, embedding_dim=embedding_dim, max_sequence_length=max_sequence_length, dropout=dropout_prob)
         self.attention = SelfAttention(embedding_dim = embedding_dim, num_heads = num_heads)
         self.layer_norm = nn.LayerNorm(embedding_dim)
@@ -20,8 +18,7 @@ class Encoder(nn.Module):
 
 
     def forward(self, x):
-        tokens = self.tokenizer(x)
-        embeddings = self.embedding(tokens)
+        embeddings = self.embedding(x)
         values = self.attention(embeddings)
         embeddings = self.dropout(embeddings)
         new_embeddings = self.layer_norm(embeddings + values)
