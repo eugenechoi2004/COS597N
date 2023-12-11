@@ -3,7 +3,6 @@ from torch import nn
 import torch.nn.functional as F
 import math
 import numpy as np
-from transformers import BertTokenizer
 
 
 class Embedding(nn.Module):

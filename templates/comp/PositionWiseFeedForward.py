@@ -2,9 +2,6 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 import sys
-from Tokenizer import Tokenizer
-from Embedding import Embedding
-from SelfAttention import SelfAttention
 
 class PositionWiseFeedForward(nn.Module):
     def __init__(self, embedding_dim, hidden_dim, dropout_prob):
