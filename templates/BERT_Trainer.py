@@ -13,8 +13,8 @@ from sklearn.metrics import accuracy_score, f1_score
 
 class BERT_Trainer(Trainer):
     def __init__(self, max_sequence_length, embedding_dim, hidden_dim, dropout_prob, num_heads, num_layers, vocab_length, batch_size, epochs, metric_path):
-        vocab_path = "/Users/eugene/Documents/GitHub/COS597N/templates/comp/vocab.json"
-        data_path = "/Users/eugene/Documents/GitHub/COS597N/templates/data/raw_data/contigs-sub500_big.fasta"
+        vocab_path = "comp/vocab.json"
+        data_path = "data/raw_data/contigs-sub500_big.fasta"
         tokenizer = TokenizerBERT(vocab_path, max_sequence_length)
         data = UniRefDataLoader(data_path, batch_size, tokenizer, max_sequence_length)
         self.train_loader = data.get_train_data_loader()
