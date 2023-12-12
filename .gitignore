@@ -12,3 +12,6 @@ Python-3.9.7/
 templates/data/raw_data/
 slurm-jobs/
 *.pyc
+*.tar
+*.fasta
+*.slurm

@@ -14,7 +14,7 @@ from sklearn.metrics import accuracy_score, f1_score
 class BERT_Trainer(Trainer):
     def __init__(self, max_sequence_length, embedding_dim, hidden_dim, dropout_prob, num_heads, num_layers, vocab_length, batch_size, epochs, metric_path):
         vocab_path = "comp/vocab.json"
-        data_path = "data/raw_data/contigs-sub500_big.fasta"
+        data_path = "uniref_linearized.fasta"
         tokenizer = TokenizerBERT(vocab_path, max_sequence_length)
         data = UniRefDataLoader(data_path, batch_size, tokenizer, max_sequence_length)
         self.train_loader = data.get_train_data_loader()
@@ -23,7 +23,7 @@ class BERT_Trainer(Trainer):
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)
         self.log_interval = 10
-        self.optimizer = optim.Adam(self.model.parameters(), lr=0.001)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=0.1)
         self.pad_token_id = 1
         self.epochs = epochs
         self.metrics = Metrics(metric_path)
@@ -56,8 +56,10 @@ class BERT_Trainer(Trainer):
         return total_loss / len(data_loader), total_accuracy / len(data_loader), total_f1 / len(data_loader)
 
     def train(self):
+        print("Starting training")
         criterion = CrossEntropyLoss(ignore_index=-100)
         for epoch in range(self.epochs):
+            print("Epoch Ran")
             self.model.train()
             for batch_idx, (data, target) in enumerate(self.train_loader):
                 data, target = data.to(self.device), target.to(self.device)
@@ -78,7 +80,7 @@ class BERT_Trainer(Trainer):
             self.metrics.track_accuracy_point(val_accuracy, val_accuracy)
             self.metrics.track_f1_point(val_f1, val_f1)
 
-            self.save_checkpoint(epoch, filename=f"checkpoint_epoch_{epoch}.pth.tar")
+            self.save_checkpoint(epoch, filename=f"checkpoints/checkpoint_epoch_{epoch}.pth.tar")
 
         # After training, save the plots
         self.metrics.save_loss_plot()
@@ -87,7 +89,7 @@ class BERT_Trainer(Trainer):
 
 # Hyperparameters
 embedding_dim = 768
-num_encoder_layers = 6
+num_encoder_layers = 3
 max_sequence_length = 500
 hidden_dim = 3072
 dropout_prob = 0.2
