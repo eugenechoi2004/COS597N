@@ -1,0 +1,1 @@
+{"max_sequence_length": 500, "embedding_dim": 512, "hidden_dim": 2048, "dropout_prob": 0.1, "num_heads": 8, "num_layers": 3, "vocab_length": 30, "batch_size": 10, "epochs": 11}

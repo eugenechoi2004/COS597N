@@ -13,7 +13,7 @@ import json
 
 
 class BERT_Trainer(Trainer):
-    def __init__(self, max_sequence_length, embedding_dim, hidden_dim, dropout_prob, num_heads, num_layers, vocab_length, batch_size, epochs, checkpoint_paths, vocab_path, data_path):
+    def __init__(self, learning_rate, max_sequence_length, embedding_dim, hidden_dim, dropout_prob, num_heads, num_layers, vocab_length, batch_size, epochs, checkpoint_paths, vocab_path, data_path):
         tokenizer = TokenizerBERT(vocab_path, max_sequence_length)
         data = UniRefDataLoader(data_path, batch_size, tokenizer, max_sequence_length)
         self.train_loader = data.get_train_data_loader()
@@ -21,8 +21,8 @@ class BERT_Trainer(Trainer):
         self.model = BERTModel(max_sequence_length, embedding_dim, hidden_dim, dropout_prob, num_heads, num_layers, vocab_length)
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model.to(self.device)
-        self.log_interval = 10
-        self.optimizer = optim.Adam(self.model.parameters(), lr=0.1)
+        self.log_interval = 1_000
+        self.optimizer = optim.Adam(self.model.parameters(), lr=learning_rate)
         self.pad_token_id = 1
         self.epochs = epochs
         self.checkpoint_paths = checkpoint_paths
@@ -52,7 +52,6 @@ class BERT_Trainer(Trainer):
         os.mkdir(weights_path)
         with open(config_path, 'w') as file:
             json.dump(self.hyperparameters, file)
-
         return metric_path, weights_path
 
     def save_checkpoint(self, epoch, filename="checkpoint.pth.tar"):
@@ -99,11 +98,11 @@ class BERT_Trainer(Trainer):
                 self.optimizer.step()
                 if batch_idx % self.log_interval == 0:
                     print(f'Train Epoch: [{batch_idx * len(data)}/{len(self.train_loader.dataset)} ({100. * batch_idx / len(self.train_loader):.0f}%)]\tLoss: {loss.item():.6f}')
-            val_loss, val_accuracy, val_f1 = self.evaluate(self.test_loader)
-            print(f'Epoch {epoch} - Validation Loss: {val_loss:.4f}, Validation Accuracy: {val_accuracy:.4f}, Validation F1: {val_f1:.4f}')
-            self.metrics.track_loss_point(loss.item(), val_loss)
-            self.metrics.track_accuracy_point(val_accuracy, val_accuracy)
-            self.metrics.track_f1_point(val_f1, val_f1)
+                    val_loss, val_accuracy, val_f1 = self.evaluate(self.test_loader)
+                    print(f'Epoch {epoch} - Validation Loss: {val_loss:.4f}, Validation Accuracy: {val_accuracy:.4f}, Validation F1: {val_f1:.4f}')
+                    self.metrics.track_loss_point(loss.item(), val_loss)
+                    self.metrics.track_accuracy_point(val_accuracy, val_accuracy)
+                    self.metrics.track_f1_point(val_f1, val_f1)
             weights = os.path.join(self.weights_path, f"checkpoint_epoch_{epoch}.pth.tar")
             self.save_checkpoint(epoch, filename=weights)
         self.metrics.save_loss_plot()
@@ -111,18 +110,19 @@ class BERT_Trainer(Trainer):
 
 
 # Hyperparameters
-embedding_dim = 768
-num_encoder_layers = 6
+learning_rate = 1e-4
+embedding_dim = 512
+num_encoder_layers = 3
 max_sequence_length = 500
-hidden_dim = 3072
-dropout_prob = 0.2
-num_heads = 12
+hidden_dim = 2048
+dropout_prob = 0.1
+num_heads = 8
 vocab_length = 30
 batch_size = 10
 epochs = 11
-checkpoing_path = "./checkpoints/"
+checkpoint_path = "./checkpoints/"
 vocab_path = "comp/vocab.json"
-data_path = "data/raw_data/test.fasta"
+data_path = "data/raw_data/100k.fasta"
 
-trainer = BERT_Trainer(max_sequence_length, embedding_dim, hidden_dim, dropout_prob, num_heads, num_encoder_layers, vocab_length, batch_size, epochs,checkpoing_path, vocab_path, data_path)
+trainer = BERT_Trainer(learning_rate, max_sequence_length, embedding_dim, hidden_dim, dropout_prob, num_heads, num_encoder_layers, vocab_length, batch_size, epochs,checkpoint_path, vocab_path, data_path)
 trainer.train()
