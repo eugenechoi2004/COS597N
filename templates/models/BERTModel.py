@@ -22,3 +22,4 @@ class BERTModel(nn.Module):
             x = layer(x)
         x = self.final_linear(x)  
         return x
+    

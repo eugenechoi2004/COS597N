@@ -12,9 +12,9 @@ class UniRefDataLoader():
         self.path_to_data = path_to_data
         self.mask_prob = mask_prob
         self.batch_size = batch_size
-        self.split_ratio = split_ratio  # Split ratio for training data
-        self.pad_token_id = 1  # Update this as per your padding token ID
-        self.mask_token_id = 2  # Update this if needed
+        self.split_ratio = split_ratio  
+        self.pad_token_id = 1  
+        self.mask_token_id = 2 
         self.data = [tokenizer.encode(record.seq) for record in SeqIO.parse(path_to_data, "fasta")]
         self.train_loader, self.test_loader = self.prepare_data_loaders()
 
