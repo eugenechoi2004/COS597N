@@ -37,9 +37,10 @@ class BERT_Trainer(Trainer):
             'batch_size': batch_size,
             'epochs': epochs
         }
-
-        self.metrics = Metrics(checkpoint_paths)
         self.current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        self.metric_path, self.weights_path = self.make_dirs()
+        self.metrics = Metrics(self.metric_path)
+        
 
     def make_dirs(self):
         folder_path = os.path.join(self.checkpoint_paths, self.current_time)
@@ -85,7 +86,7 @@ class BERT_Trainer(Trainer):
         print("Starting training")
         criterion = CrossEntropyLoss(ignore_index=-100)
         for epoch in range(self.epochs):
-            print("Epoch Ran")
+            print(f"{epoch} Epoch Ran")
             self.model.train()
             for batch_idx, (data, target) in enumerate(self.train_loader):
                 data, target = data.to(self.device), target.to(self.device)
@@ -98,19 +99,16 @@ class BERT_Trainer(Trainer):
                 self.optimizer.step()
                 if batch_idx % self.log_interval == 0:
                     print(f'Train Epoch: [{batch_idx * len(data)}/{len(self.train_loader.dataset)} ({100. * batch_idx / len(self.train_loader):.0f}%)]\tLoss: {loss.item():.6f}')
-
             val_loss, val_accuracy, val_f1 = self.evaluate(self.test_loader)
             print(f'Epoch {epoch} - Validation Loss: {val_loss:.4f}, Validation Accuracy: {val_accuracy:.4f}, Validation F1: {val_f1:.4f}')
             self.metrics.track_loss_point(loss.item(), val_loss)
             self.metrics.track_accuracy_point(val_accuracy, val_accuracy)
             self.metrics.track_f1_point(val_f1, val_f1)
-
-            self.save_checkpoint(epoch, filename=f"checkpoints/checkpoint_epoch_{epoch}.pth.tar")
-
-        # After training, save the plots
+            weights = os.path.join(self.weights_path, f"checkpoint_epoch_{epoch}.pth.tar")
+            self.save_checkpoint(epoch, filename=weights)
         self.metrics.save_loss_plot()
         self.metrics.save_accuracy_plot()
-        # Save other plots if necessary
+
 
 # Hyperparameters
 embedding_dim = 768
@@ -122,9 +120,9 @@ num_heads = 12
 vocab_length = 30
 batch_size = 10
 epochs = 11
-metric_path = "./checkpoints/"
+checkpoing_path = "./checkpoints/"
 vocab_path = "comp/vocab.json"
 data_path = "data/raw_data/test.fasta"
 
-trainer = BERT_Trainer(max_sequence_length, embedding_dim, hidden_dim, dropout_prob, num_heads, num_encoder_layers, vocab_length, batch_size, epochs,metric_path)
+trainer = BERT_Trainer(max_sequence_length, embedding_dim, hidden_dim, dropout_prob, num_heads, num_encoder_layers, vocab_length, batch_size, epochs,checkpoing_path, vocab_path, data_path)
 trainer.train()
